@@ -1,23 +1,38 @@
-#!/usr/bin/env node
-
 const tcp = require("net");
-const program = require("commander");
-
-console.log("in index.js for port-scanner");
-
-program
-  .option("-p --port [port]", "which port to use")
-  .option("-h --host [host]", "host name")
-  .action(function(options) {
+const dns = require("dns");
+const colors = require("colors");
+class PortScanner {
+  scanPort(options) {
     console.log("in action");
     try {
       const port = options.port || 80;
       const host = options.host || null;
       const socket = tcp.connect({ host: host, port: port });
-      console.log("socket created successfully: ", socket);
+      console.log("socket created successfully".green);
+      process.exit(0);
     } catch (e) {
       console.log(e);
+      process.exit(1);
     }
-  });
+  }
+  getIpAddressByHost(options) {
+    if (!options.host) {
+      console.log("No host specified.".red);
+      process.exit(1);
+    }
+    dns.lookup(options.host, (error, result) => {
+      if (error) {
+        console.log(error.code.red);
+        process.exit(1);
+      } else {
+        console.log(result.green);
+        process.exit(0);
+      }
+    });
+  }
+  // getHostByIpAddress(options) {
 
-program.parse(process.argv);
+  // }
+}
+
+module.exports = PortScanner;
